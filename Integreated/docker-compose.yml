@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  ecommerce-fraud-detection:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - IPINFO_TOKEN=${IPINFO_TOKEN}
+      - DOS_DETECTION_ENDPOINT=http://host.docker.internal:5001/dos
+    volumes:
+      - ./app:/usr/src/app/app
+      - ./components:/usr/src/app/components
+      - ./public:/usr/src/app/public
+      - ./styles:/usr/src/app/styles
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    network_mode: "bridge"
+# Note: This configuration allows the Next.js app running in Docker to:
+# 1. Access the MongoDB database defined in the .env.local file
+# 2. Access the ML models running on the host machine via host.docker.internal
+# 3. Hot-reload changes to application files through volume mounts
+#
+# To run ML models on the host:
+# Make sure your ML model is listening on port 5001 and can accept requests from Docker containers
+# Requests from inside the container should use http://host.docker.internal:5001/dos instead of localhost
